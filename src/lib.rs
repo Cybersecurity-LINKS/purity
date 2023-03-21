@@ -1,4 +1,4 @@
-pub mod channel {
+pub mod purity {
 
     use std::time::{Duration, SystemTime, UNIX_EPOCH, Instant};
     use anyhow::{Context, Ok};

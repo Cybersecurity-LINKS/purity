@@ -2,7 +2,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::thread::sleep;
 use std::collections::{BinaryHeap, HashSet};
 use iota_client::block::BlockId;
-use mylib::channel::{
+use mylib::purity::{
     read, read_addr, write_with_client, setup_with_client
 };
 

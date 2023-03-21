@@ -1,7 +1,4 @@
-// Copyright 2021 IOTA Stiftung
-// SPDX-License-Identifier: Apache-2.0
-
-//! cargo run --example create_wallet --release
+//! cargo run --bin test
 // In this example we will create a new wallet
 // Rename `.env.example` to `.env` first
 
@@ -22,7 +19,7 @@ use iota_wallet::{
     ClientOptions, Result, account::{AccountHandle, TransactionOptions},
 };
 
-use mylib::channel::{
+use mylib::purity::{
     write_with_wallet
 };
 
