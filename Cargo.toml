@@ -1,5 +1,5 @@
 [package]
-name = "channel"
+name = "purity"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,13 +7,13 @@ edition = "2021"
 
 [dependencies]
 # iota-client = {"2.0.1-rc.4", default-features = false, features = [ "message_interface", "tls" ]}
-iota-client = "2.0.1-rc.4"
-iota-wallet = "1.0.0-rc.5"
-tokio = { version = "1.22.0", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ] }
-dotenv = "0.15.0"
-hex = "0.4.3"
-anyhow = "1.0.62"
-rand = "0.8.5"
+iota-client = "2.0.1-rc.4" # Apache-2.0 license
+iota-wallet = "1.0.0-rc.5" # Apache-2.0 license
+tokio = { version = "1.22.0", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ] } # MIT license
+dotenv = "0.15.0" # MIT license
+hex = "0.4.3" # MIT OR Apache-2.0 license
+anyhow = "1.0.62" # MIT OR Apache-2.0 license
+rand = "0.8.5" # MIT OR Apache-2.0 license
 
 [lib]
 name = "mylib"
