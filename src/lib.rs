@@ -1,3 +1,7 @@
+// Copyright (c) 2023, LINKS Foundation
+// SPDX-License-Identifier: Apache-2.0
+// All Rights Reserved. See LICENSE for license details.
+
 pub mod purity {
 
     use std::time::{Duration, SystemTime, UNIX_EPOCH, Instant};

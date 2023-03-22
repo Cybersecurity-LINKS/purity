@@ -1,6 +1,8 @@
+// Copyright (c) 2023, LINKS Foundation
+// SPDX-License-Identifier: Apache-2.0
+// All Rights Reserved. See LICENSE for license details.
+
 //! cargo run --bin test
-// In this example we will create a new wallet
-// Rename `.env.example` to `.env` first
 
 use std::thread::sleep;
 use std::{env, path::PathBuf};
@@ -117,9 +119,9 @@ async fn main() -> Result<()> {
         addresses = account.generate_addresses(1, None).await?;
         address =  addresses[0].address();
     
-        // let faucet_response =
-        //     request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address.to_bech32()).await?;
-        // println!("{faucet_response}");
+        let faucet_response =
+            request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address.to_bech32()).await?;
+        println!("{faucet_response}");
     // }
 
     let printable_address = address.to_bech32(); // String::from("tst1qqe0lsnt2fk0zhvdcst9txwxm7x8dpt9vsku609gkavlvq3wutkz2jtt27n");

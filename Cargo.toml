@@ -2,6 +2,14 @@
 name = "purity"
 version = "0.1.0"
 edition = "2021"
+authors = [ "LINKS Foundation" ]
+description = "Library to structure, to navigate and to consume data from/to the IOTA Tangle based on Stardust protocol. Compatible with SHIMMER network."
+# documentation = ""
+# homepage = ""
+repository = "https://github.com/Cybersecurity-LINKS/purity"
+license = "Apache-2.0"
+keywords = [ "iota", "wallet" ]
+categories = [ "cryptography::cryptocurrencies" ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
