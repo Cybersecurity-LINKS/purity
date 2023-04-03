@@ -21,9 +21,7 @@ use iota_wallet::{
     ClientOptions, Result, account::{AccountHandle, TransactionOptions},
 };
 
-use mylib::purity::{
-    write_with_wallet
-};
+use purity_lib::account::PurityAccountExt;
 
 async fn setup_wallet() -> Result<()> {
     // Setup Stronghold secret_manager
@@ -84,6 +82,9 @@ async fn main() -> Result<()> {
     let accounts = manager.get_accounts().await?;
     let account = manager.get_account("Alice").await?;
 
+    account.hello();
+
+
     // Sync account to make sure account is updated with outputs from previous examples
     // Sync the account to get the outputs for the addresses
     let _ = account.sync(None).await?;
@@ -127,10 +128,8 @@ async fn main() -> Result<()> {
     let printable_address = address.to_bech32(); // String::from("tst1qqe0lsnt2fk0zhvdcst9txwxm7x8dpt9vsku609gkavlvq3wutkz2jtt27n");
     println!("Generated address: {}", printable_address);
     
-    
-
     let tag = "wallet-lib";
-    for i in 0..100 {   
+    for i in 0..2 {   
         let _ = account.sync(None).await?;
         // let s = "this is metadata";
         // let metadata = format!("{}-{}", s, i);
@@ -140,8 +139,8 @@ async fn main() -> Result<()> {
         start = Instant::now();
         
        
-        let _tid = write_with_wallet(
-            &account, 
+        let _tid = account.write_data(//write_with_wallet(
+            // &account, 
             printable_address.clone(), 
             tag, 
             data, //  metadata.as_str().as_bytes().to_vec(),
@@ -150,6 +149,7 @@ async fn main() -> Result<()> {
         duration = start.elapsed().as_millis();
         println!("{},{:?}",i, duration );
         // sleep(Duration::from_millis(1000));
+        // account.write();
     }
     
     // Consolidate unspent outputs and print the consolidation transaction IDs

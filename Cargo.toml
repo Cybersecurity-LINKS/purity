@@ -22,9 +22,10 @@ dotenv = "0.15.0" # MIT license
 hex = "0.4.3" # MIT OR Apache-2.0 license
 anyhow = "1.0.62" # MIT OR Apache-2.0 license
 rand = "0.8.5" # MIT OR Apache-2.0 license
+async-trait = "0.1.68" # MIT OR Apache-2.0 license
 
 [lib]
-name = "mylib"
+name = "purity_lib"
 path = "src/lib.rs"
 
 [[bin]]
@@ -38,3 +39,7 @@ path = "src/bin/reader.rs"
 [[bin]]
 name = "test"
 path = "src/bin/test.rs"
+
+[[bin]]
+name = "test-alias"
+path = "src/bin/test-alias.rs"

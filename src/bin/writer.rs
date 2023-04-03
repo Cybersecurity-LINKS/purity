@@ -6,7 +6,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::thread::sleep;
 // use std::collections::BinaryHeap;
 // use iota_client::block::BlockId;
-use mylib::purity::{
+use purity_lib::purity::{
     read, write_with_client, setup_with_client
 };
 
@@ -15,6 +15,8 @@ use iota_client::{
     secret::{SecretManager},
     Client
 };
+
+
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -42,7 +44,7 @@ async fn main() -> anyhow::Result<()> {
     write_with_client(&mut secret_manager, &client, address, tag, metadata, None).await?;
 
     sleep(Duration::from_millis(5000));
-    read(&client, tag).await?;
+    read(&client, tag, address).await?;
     
 
 
