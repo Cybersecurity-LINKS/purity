@@ -6,9 +6,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::thread::sleep;
 use std::collections::{BinaryHeap, HashSet};
 use iota_client::block::BlockId;
-use purity_lib::purity::{
-    read, write_with_client, setup_with_client
-};
+use purity_lib::purity::read;
 
 use iota_client::{
     block::address::Address,
