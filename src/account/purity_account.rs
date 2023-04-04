@@ -35,7 +35,8 @@ pub trait PurityAccountExt {
         address: String,
         tag: &str, 
         metadata: Vec<u8>,
-        expiration: Option<u32>) -> anyhow::Result<String>;
+        expiration: Option<u32>
+    ) -> anyhow::Result<String>;
 }
 
 #[async_trait]

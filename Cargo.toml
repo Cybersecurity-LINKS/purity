@@ -25,7 +25,7 @@ rand = "0.8.5" # MIT OR Apache-2.0 license
 async-trait = "0.1.68" # MIT OR Apache-2.0 license
 
 [lib]
-name = "purity_lib"
+name = "purity"
 path = "src/lib.rs"
 
 [[bin]]

@@ -21,8 +21,8 @@ use iota_wallet::{
     ClientOptions, Result, account::{AccountHandle, TransactionOptions},
 };
 
-use purity_lib::account::PurityAccountExt;
-use purity_lib::utils::setup_wallet;
+use purity::account::PurityAccountExt;
+use purity::utils::setup_wallet;
 
 
 #[tokio::main]
