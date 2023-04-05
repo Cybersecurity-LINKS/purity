@@ -97,7 +97,7 @@ async fn main() -> Result<()> {
     
     // new_alias_output(&account, address.as_ref().clone(),(0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>()).await;
 
-    let _ = account.write_alias_data(printable_address, (0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>(), (0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>()).await;
+    let _ = account.write_alias_data(printable_address, (0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>(), (0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>(), None).await;
     println!("end");
 
     Ok(())

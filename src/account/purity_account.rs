@@ -46,6 +46,7 @@ pub trait PurityAccountExt {
         address: String,
         tag: Vec<u8>, 
         metadata: Vec<u8>,
+        alias_id: Option<AliasId>,
     ) -> anyhow::Result<String>;
 }
 
@@ -66,8 +67,6 @@ impl PurityAccountExt for AccountHandle {
         log::info!("Start write_data");
         let write_data_start_time = Instant::now();
         
-
-
         let timelock = (SystemTime::now() + Duration::from_secs(30))
             .duration_since(UNIX_EPOCH)
             .expect("clock went backwards")
@@ -149,24 +148,34 @@ impl PurityAccountExt for AccountHandle {
 
     async fn write_alias_data(
         &self,
-        address: String,
-        tag: Vec<u8>, 
-        metadata: Vec<u8>,
+        _address: String,
+        _tag: Vec<u8>, 
+        _metadata: Vec<u8>,
+        alias_id: Option<AliasId>,
     ) -> anyhow::Result<String> {
 
+        // TODO: alias_options
         // let alias_options = AliasOutputOptions {
         //     address: None,
         //     immutable_metadata: Some(b"some immutable alias metadata".to_vec()),
         //     metadata: Some(b"some alias metadata".to_vec()),
         //     state_metadata: Some(b"some alias state metadata".to_vec()),
         // };
-    
-        let transaction = self.create_alias_output(None, None).await?;
-        println!(
-            "Block sent: {}",
-            transaction.block_id.expect("no block created yet")
-        );
+        
+        
+        if let Some(_a_id) = alias_id {
+            // let alias_output = self.get_alias_output(alias_id).await?; // TODO: retrieve output
+            // TODO: update output
+            // self.send() // TODO: publish updated output
+        } else {
+            // TODO: create alias output for the first time 
+            let transaction = self.create_alias_output(None, None).await?;
+            println!(
+                "Block sent: {}",
+                transaction.block_id.expect("no block created yet")
+            );
+        };
 
-        Ok("return".to_string())
+        Ok("return".to_string()) // TODO: return alias id (useful for the first time creation)
     }
 }

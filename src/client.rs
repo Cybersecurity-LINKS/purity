@@ -103,7 +103,8 @@ pub async fn write_with_client(
                 .add_feature(Feature::Metadata(MetadataFeature::new(metadata.as_bytes().to_vec())?))
                 .add_feature(Feature::Sender(SenderFeature::new(address)))
                 .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
-                .finish_output(token_supply)?;}
+                .finish_output(token_supply)?;
+        }
     }
 
     duration = start.elapsed().as_millis();

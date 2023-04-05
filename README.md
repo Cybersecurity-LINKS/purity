@@ -20,3 +20,5 @@ To use the library, add this to your `Cargo.toml`:
 [dependencies]
 purity = { git = "https://github.com/Cybersecurity-LINKS/purity.git" }
 ```
+
+` $env:RUST_LOG = "debug" cargo run --bin test`
