@@ -3,8 +3,9 @@
 // All Rights Reserved. See LICENSE for license details.
 
 use iota_wallet::account::AccountHandle;
+// use iota_wallet::account::AliasOutputOptions;
 
-use std::time::{Duration, SystemTime, UNIX_EPOCH, Instant};
+use std::{time::{Duration, SystemTime, UNIX_EPOCH, Instant}, io::SeekFrom};
 use anyhow::{Context, Ok};
 use async_trait::async_trait;
 
@@ -27,6 +28,8 @@ use iota_client::{
     node_api::indexer::query_parameters::QueryParameter, Error, Result
 };
 
+// use iota_wallet::account::operations::transaction::high_level::create_alias::AliasOutputOptionsDto;
+
 #[async_trait]
 pub trait PurityAccountExt {
     fn hello(&self);
@@ -36,6 +39,13 @@ pub trait PurityAccountExt {
         tag: &str, 
         metadata: Vec<u8>,
         expiration: Option<u32>
+    ) -> anyhow::Result<String>;
+
+    async fn write_alias_data(
+        &self,
+        address: String,
+        tag: Vec<u8>, 
+        metadata: Vec<u8>,
     ) -> anyhow::Result<String>;
 }
 
@@ -152,5 +162,28 @@ impl PurityAccountExt for AccountHandle {
         // );
         println!("End write {}", return_value);
         Ok(return_value)
+    }
+
+    async fn write_alias_data(
+        &self,
+        address: String,
+        tag: Vec<u8>, 
+        metadata: Vec<u8>,
+    ) -> anyhow::Result<String> {
+
+        // let alias_options = AliasOutputOptions {
+        //     address: None,
+        //     immutable_metadata: Some(b"some immutable alias metadata".to_vec()),
+        //     metadata: Some(b"some alias metadata".to_vec()),
+        //     state_metadata: Some(b"some alias state metadata".to_vec()),
+        // };
+    
+        let transaction = self.create_alias_output(None, None).await?;
+        println!(
+            "Block sent: {}",
+            transaction.block_id.expect("no block created yet")
+        );
+
+        Ok("return".to_string())
     }
 }
