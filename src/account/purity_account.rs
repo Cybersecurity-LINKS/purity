@@ -62,8 +62,11 @@ impl PurityAccountExt for AccountHandle {
         metadata: Vec<u8>,
         expiration: Option<u32>
     ) -> anyhow::Result<String> {
-        let mut start;
-        let mut duration;
+
+        log::info!("Start write_data");
+        let write_data_start_time = Instant::now();
+        
+
 
         let timelock = (SystemTime::now() + Duration::from_secs(30))
             .duration_since(UNIX_EPOCH)
@@ -71,13 +74,9 @@ impl PurityAccountExt for AccountHandle {
             .as_secs()
             .try_into()
             .unwrap();
-        start = Instant::now();
         // Send native tokens together with the required storage deposit
         let rent_structure = self.client().get_rent_structure().await?;
-        duration = start.elapsed().as_millis();
-        println!("Time elapsed in client.get_rent_structure() is: {:?}", duration );
-
-        start = Instant::now();   
+    
         let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
             .add_feature(Feature::Tag(TagFeature::new(tag.as_bytes().to_vec())?))
             .add_feature(Feature::Metadata(MetadataFeature::new(metadata)?))
@@ -89,8 +88,6 @@ impl PurityAccountExt for AccountHandle {
             )))
             .add_unlock_condition(UnlockCondition::Timelock(TimelockUnlockCondition::new(timelock)?))
             .finish_output(self.client().get_token_supply().await?)?;
-        duration = start.elapsed().as_millis();
-        println!("Time elapsed in BasicOutputBuilder is: {:?}", duration );
 
         let outputs = vec![
             output
@@ -124,43 +121,29 @@ impl PurityAccountExt for AccountHandle {
         //let transaction = account.send(outputs, options).await?;
     
         let mut transaction = None;
-        start = Instant::now();   
         let return_value = match self.send(outputs, options).await {
             core::result::Result::Ok(t) => {
-                duration = start.elapsed().as_millis();
-                println!("Time elapsed in account.send() is: {:?}", duration );
                 // Save the transaction in a variable
                 transaction = Some(t);       
-                
-                println!("prova" );
-
-                
-                start = Instant::now();   
+                               
                 self
                     .retry_transaction_until_included(&transaction.clone().unwrap().transaction_id, None, Some(1))
                     .await?;
                 
-                duration = start.elapsed().as_millis();
-                println!("Time elapsed in account.retry_transaction_until_included() is: {:?}", duration );
 
                 println!("Block on Explorer: {}/block/{}\n\n", std::env::var("EXPLORER_URL").unwrap(), transaction.clone().unwrap().block_id.expect("no block created yet"));
                 transaction.unwrap().transaction_id.to_string()
             }
             Err(e) => {
                 // Print the error message and throw an exception
-                eprintln!("Error sending transaction: {}", e);
+                log::warn!("Error sending transaction: {}", e);
                 e.to_string()
                 //panic!("Transaction send failed");
             }
         };
-    
-        // println!(
-        // "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        // transaction.transaction_id,
-        // &env::var("NODE_URL").unwrap(),
-        // transaction.block_id.expect("no block created yet")
-        // );
-        println!("End write {}", return_value);
+           
+        log::info!("Finished write_data in {:.2?}", write_data_start_time.elapsed());
+
         Ok(return_value)
     }
 

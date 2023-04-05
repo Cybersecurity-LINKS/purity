@@ -25,11 +25,12 @@ use iota_wallet::{
 use purity::account::PurityAccountExt;
 use purity::utils::setup_wallet;
 
-
-
+extern crate pretty_env_logger;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+
+    pretty_env_logger::init();
 
     // This example uses dotenv, which is not safe for use in production
     dotenv().ok();

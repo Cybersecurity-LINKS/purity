@@ -24,9 +24,13 @@ use iota_wallet::{
 use purity::account::PurityAccountExt;
 use purity::utils::setup_wallet;
 
+extern crate pretty_env_logger;
+#[macro_use] extern crate log;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    pretty_env_logger::init();
+
     let mut start;
     let mut duration;
 

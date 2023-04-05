@@ -23,6 +23,8 @@ hex = "0.4.3" # MIT OR Apache-2.0 license
 anyhow = "1.0.62" # MIT OR Apache-2.0 license
 rand = "0.8.5" # MIT OR Apache-2.0 license
 async-trait = "0.1.68" # MIT OR Apache-2.0 license
+log = "0.4" # MIT OR Apache-2.0 license
+pretty_env_logger = "0.4" # MIT OR Apache-2.0 license
 
 [lib]
 name = "purity"
