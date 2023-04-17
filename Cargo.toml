@@ -30,18 +30,18 @@ pretty_env_logger = "0.4" # MIT OR Apache-2.0 license
 name = "purity"
 path = "src/lib.rs"
 
-[[bin]]
+[[example]]
 name = "writer"
-path = "src/bin/writer.rs"
+path = "examples/writer.rs"
 
-[[bin]]
+[[example]]
 name = "reader"
-path = "src/bin/reader.rs"
+path = "examples/reader.rs"
 
-[[bin]]
+[[example]]
 name = "test"
-path = "src/bin/test.rs"
+path = "examples/test.rs"
 
-[[bin]]
+[[example]]
 name = "test-alias"
-path = "src/bin/test-alias.rs"
+path = "examples/test-alias.rs"
