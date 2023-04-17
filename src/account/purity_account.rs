@@ -63,7 +63,6 @@ impl PurityAccountExt for AccountHandle {
         metadata: Vec<u8>,
         expiration: Option<u32>
     ) -> anyhow::Result<String> {
-
         log::info!("Start write_data");
         let write_data_start_time = Instant::now();
         
@@ -118,22 +117,18 @@ impl PurityAccountExt for AccountHandle {
     
     
         //let transaction = account.send(outputs, options).await?;
-    
-        let mut transaction = None;
         let return_value = match self.send(outputs, options).await {
-            core::result::Result::Ok(t) => {
+            iota_wallet::Result::Ok(t) => {
                 // Save the transaction in a variable
-                transaction = Some(t);       
-                               
-                self
-                    .retry_transaction_until_included(&transaction.clone().unwrap().transaction_id, None, Some(1))
+                           
+                let _ = self
+                    .retry_transaction_until_included(&t.transaction_id, None, None)
                     .await?;
-                
 
-                println!("Block on Explorer: {}/block/{}\n\n", std::env::var("EXPLORER_URL").unwrap(), transaction.clone().unwrap().block_id.expect("no block created yet"));
-                println!("{:?}", transaction.clone().unwrap());
-                transaction.unwrap().transaction_id.to_string()
-            }
+                println!("Block on Explorer: {}/block/{}\n\n", std::env::var("EXPLORER_URL").unwrap(), t.block_id.expect("no block created yet"));
+                println!("{:?}", t.clone());
+                t.transaction_id.to_string() // TODO: return Outputid
+            } 
             Err(e) => {
                 // Print the error message and throw an exception
                 log::warn!("Error sending transaction: {}", e);
