@@ -94,7 +94,7 @@ async fn main() -> Result<()> {
     
         let faucet_response =
             request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address.to_bech32()).await?;
-        println!("{faucet_response}");
+        println!("Faucet: {faucet_response}");
     // }
 
     let printable_address = address.to_bech32(); // String::from("tst1qqe0lsnt2fk0zhvdcst9txwxm7x8dpt9vsku609gkavlvq3wutkz2jtt27n");

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // All Rights Reserved. See LICENSE for license details.
 
-use std::time::{Duration, SystemTime, UNIX_EPOCH, Instant};
+use std::{time::{Duration, SystemTime, UNIX_EPOCH, Instant}, env};
 use anyhow::{Context, Ok};
 
 use iota_client::{
@@ -26,19 +26,15 @@ use iota_client::{
 
 use iota_wallet::account::AccountHandle;
 
-use crate::NODE_URL;
-use crate::FAUCET_URL;
-
-
 
 pub async fn setup_with_client() -> anyhow::Result<(SecretManager, Client, Address)> {
     let mut start;
     let mut duration;
-
+    
     println!("IOTA channel tests\n\n");
 
     start = Instant::now();
-    let client = Client::builder().with_node(&NODE_URL)?.finish()?;
+    let client = Client::builder().with_node(&env::var("NODE_URL").unwrap())?.finish()?;
     duration = start.elapsed().as_millis();
     println!("Time elapsed in Client::builder() is: {:?}", duration );
 
@@ -61,7 +57,7 @@ pub async fn setup_with_client() -> anyhow::Result<(SecretManager, Client, Addre
     println!("Address: {printable_address}");
     if token_supply < 1000 {
         start = Instant::now();
-        request_funds_from_faucet(&FAUCET_URL, &printable_address).await?;
+        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &printable_address).await?;
         duration = start.elapsed().as_millis();
         println!("Time elapsed in client.get_addresses() is: {:?}", duration );
     }
@@ -127,8 +123,8 @@ pub async fn write_with_client(
         
     // println!("{block:#?}");
 
-    println!("Transaction sent: {NODE_URL}/api/core/v2/blocks/{}", block.id());
-    println!("Block metadata: {NODE_URL}/api/core/v2/blocks/{}/metadata", block.id());
+    println!("Transaction sent: {}/api/core/v2/blocks/{}", &env::var("NODE_URL").unwrap(), block.id());
+    println!("Block metadata: {}/api/core/v2/blocks/{}/metadata", &env::var("NODE_URL").unwrap(), block.id());
     println!("Block on Explorer: {}/block/{}\n\n",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()

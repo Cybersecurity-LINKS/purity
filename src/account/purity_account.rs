@@ -131,6 +131,7 @@ impl PurityAccountExt for AccountHandle {
                 
 
                 println!("Block on Explorer: {}/block/{}\n\n", std::env::var("EXPLORER_URL").unwrap(), transaction.clone().unwrap().block_id.expect("no block created yet"));
+                println!("{:?}", transaction.clone().unwrap());
                 transaction.unwrap().transaction_id.to_string()
             }
             Err(e) => {
