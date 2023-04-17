@@ -31,17 +31,17 @@ name = "purity"
 path = "src/lib.rs"
 
 [[example]]
-name = "writer"
-path = "examples/writer.rs"
+name = "client-write"
+path = "examples/client_write.rs"
 
 [[example]]
 name = "reader"
 path = "examples/reader.rs"
 
 [[example]]
-name = "test"
-path = "examples/test.rs"
+name = "write"
+path = "examples/account_write.rs"
 
 [[example]]
-name = "test-alias"
-path = "examples/test-alias.rs"
+name = "alias"
+path = "examples/account_write_alias.rs"
