@@ -39,7 +39,7 @@ pub trait PurityAccountExt {
         tag: &str, 
         metadata: Vec<u8>,
         expiration: Option<u32>
-    ) -> anyhow::Result<String>;
+    ) -> anyhow::Result<OutputId>;
 
     async fn write_alias_data(
         &self,
@@ -62,11 +62,11 @@ impl PurityAccountExt for AccountHandle {
         tag: &str, 
         metadata: Vec<u8>,
         expiration: Option<u32>
-    ) -> anyhow::Result<String> {
+    ) -> anyhow::Result<OutputId> {
         log::info!("Start write_data");
         let write_data_start_time = Instant::now();
         
-        let timelock = (SystemTime::now() + Duration::from_secs(30))
+        let timelock = (SystemTime::now() + Duration::from_secs(240))
             .duration_since(UNIX_EPOCH)
             .expect("clock went backwards")
             .as_secs()
@@ -118,28 +118,26 @@ impl PurityAccountExt for AccountHandle {
     
         //let transaction = account.send(outputs, options).await?;
         let return_value = match self.send(outputs, options).await {
-            iota_wallet::Result::Ok(t) => {
+            anyhow::Result::Ok(t) => {
                 // Save the transaction in a variable
                            
                 let _ = self
                     .retry_transaction_until_included(&t.transaction_id, None, None)
-                    .await?;
-
+                    .await;
                 println!("Block on Explorer: {}/block/{}\n\n", std::env::var("EXPLORER_URL").unwrap(), t.block_id.expect("no block created yet"));
-                println!("{:?}", t.clone());
-                t.transaction_id.to_string() // TODO: return Outputid
+                Ok(OutputId::new(t.transaction_id, 0 as u16)?)  // TODO: fragmentation will require something else
             } 
-            Err(e) => {
+            Err(err) => {
                 // Print the error message and throw an exception
-                log::warn!("Error sending transaction: {}", e);
-                e.to_string()
+                log::warn!("Error sending transaction: {}", err);
+                anyhow::bail!(err)
                 //panic!("Transaction send failed");
             }
         };
            
         log::info!("Finished write_data in {:.2?}", write_data_start_time.elapsed());
 
-        Ok(return_value)
+        return_value
     }
 
     async fn write_alias_data(
