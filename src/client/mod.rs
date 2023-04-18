@@ -136,6 +136,22 @@ pub async fn write_with_client(
     Ok(block.id()) // return outputid da salvare nello storage
 }
 
+pub async fn read_by_tag(
+    client: &Client, 
+    tag: &str,
+) -> anyhow::Result<Vec<OutputId>> {
+
+    let output_ids = client
+        .basic_output_ids(vec![
+            QueryParameter::Tag(format!("0x{}",hex::encode(tag))),
+
+        ])
+        .await
+        .context("failed to retrieve output ids")?;
+
+    Ok(output_ids)
+}
+
 pub async fn read(
     client: &Client, 
     tag: &str,
