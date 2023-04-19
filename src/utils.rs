@@ -5,6 +5,9 @@
 use std::thread::sleep;
 use std::{env, path::PathBuf};
 use std::time::{Instant};
+use iota_client::api_types::core::response::OutputWithMetadataResponse;
+use iota_client::block::output::dto::OutputDto;
+use iota_client::block::output::feature::dto::FeatureDto;
 use rand::prelude::*;
 use dotenv::dotenv;
 
@@ -50,4 +53,21 @@ pub async fn setup_wallet() -> Result<()> {
 
     println!("Generated a new account");
     Ok(())
+}
+
+pub fn get_metadata(o: OutputWithMetadataResponse) -> anyhow::Result<Vec<u8>> {
+    match o.output {
+        OutputDto::Basic(b) => { 
+
+            for f in b.features {
+                if let FeatureDto::Metadata(m) = f {
+                    return Ok( hex::decode(&m.data[2..]).unwrap() );               
+                }
+            }
+            return anyhow::bail!("No FeatureDto::Metadata"); 
+        }
+        _ => { 
+            anyhow::bail!("No OutputDto of type Basic")
+        }
+    }
 }

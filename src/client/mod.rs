@@ -21,7 +21,7 @@ use iota_client::{
     block::{address::{Address, self}},
     secret::{mnemonic::MnemonicSecretManager,SecretManager},
     Client, 
-    node_api::indexer::query_parameters::QueryParameter, Error, Result
+    node_api::indexer::query_parameters::QueryParameter, Error, Result, api_types::core::response::OutputWithMetadataResponse
 };
 
 use iota_wallet::account::AccountHandle;
@@ -148,8 +148,24 @@ pub async fn read_by_tag(
         ])
         .await
         .context("failed to retrieve output ids")?;
-
+    
     Ok(output_ids)
+}
+
+
+pub async fn read_outputs(
+    client: &Client, 
+    output_ids: Vec<OutputId>,
+) -> anyhow::Result<Vec<OutputWithMetadataResponse>> {
+
+    // Get the outputs by their IDs.
+    let outputs_responses = client
+        .get_outputs(output_ids)
+        .await
+        .context("failed to get outputs")?;
+    // println!("Basic outputs: {outputs_responses:#?}");
+
+    Ok(outputs_responses)
 }
 
 pub async fn read(
@@ -158,7 +174,6 @@ pub async fn read(
     address: Address,
 ) -> anyhow::Result<Vec<OutputId>> {
 
-    // Get output IDs of basic outputs that can be controlled by this address without further unlock constraints.
     // start = Instant::now();
     let output_ids = client
         .basic_output_ids(vec![
@@ -170,8 +185,6 @@ pub async fn read(
         ])
         .await
         .context("failed to retrieve output ids")?;
-    // duration = start.elapsed().as_millis();
-    // println!("Time elapsed in client.basic_output_ids() is: {:?}", duration );
     // println!("Address output IDs {output_ids:#?}");
     
     // Get the outputs by their IDs.
