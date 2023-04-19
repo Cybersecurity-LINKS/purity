@@ -136,7 +136,7 @@ impl PurityAccountExt for AccountHandle {
         };
            
         log::info!("Finished write_data in {:.2?}", write_data_start_time.elapsed());
-
+        let _ = self.sync(None).await?;
         return_value
     }
 
@@ -170,6 +170,7 @@ impl PurityAccountExt for AccountHandle {
             );
         };
 
+        let _ = self.sync(None).await?;
         Ok("return".to_string()) // TODO: return alias id (useful for the first time creation)
     }
 }
