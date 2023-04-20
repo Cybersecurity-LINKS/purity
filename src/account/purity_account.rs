@@ -66,7 +66,7 @@ impl PurityAccountExt for AccountHandle {
         log::info!("Start write_data");
         let write_data_start_time = Instant::now();
         
-        let timelock = (SystemTime::now() + Duration::from_secs(240))
+        let timelock = (SystemTime::now() + Duration::from_secs(60*60))
             .duration_since(UNIX_EPOCH)
             .expect("clock went backwards")
             .as_secs()
@@ -124,7 +124,7 @@ impl PurityAccountExt for AccountHandle {
                 let _ = self
                     .retry_transaction_until_included(&t.transaction_id, None, None)
                     .await;
-                println!("Block on Explorer: {}/block/{}\n\n", std::env::var("EXPLORER_URL").unwrap(), t.block_id.expect("no block created yet"));
+                println!("Block on Explorer: {}/block/{}", std::env::var("EXPLORER_URL").unwrap(), t.block_id.expect("no block created yet"));
                 Ok(OutputId::new(t.transaction_id, 0 as u16)?)  // TODO: fragmentation will require something else
             } 
             Err(err) => {
@@ -136,6 +136,7 @@ impl PurityAccountExt for AccountHandle {
         };
            
         log::info!("Finished write_data in {:.2?}", write_data_start_time.elapsed());
+        println!("Finished write_data in {:.2?}", write_data_start_time.elapsed());
         let _ = self.sync(None).await?;
         return_value
     }

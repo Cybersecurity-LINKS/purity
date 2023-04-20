@@ -35,7 +35,10 @@ pub async fn setup_wallet() -> Result<()> {
     secret_manager.store_mnemonic(mnemonic).await?;
 
     // Create the account manager with the secret_manager and client options
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new()
+    // .with_local_pow(false)
+    .with_node(&env::var("NODE_URL")
+    .unwrap())?;
 
     let manager = AccountManager::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
@@ -51,7 +54,7 @@ pub async fn setup_wallet() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Generated a new account");
+    // println!("Generated a new account");
     Ok(())
 }
 
