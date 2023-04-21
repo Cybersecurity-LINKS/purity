@@ -2,16 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 // All Rights Reserved. See LICENSE for license details.
 
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::thread::sleep;
-use std::collections::{BinaryHeap, HashSet};
-use iota_client::block::BlockId;
+use std::collections::HashSet;
+
 use purity::client::read;
 
 use iota_client::{
     block::address::Address,
     block::output::OutputId,
-    secret::{SecretManager},
     Client
 };
 

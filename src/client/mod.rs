@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // All Rights Reserved. See LICENSE for license details.
 
-use std::{time::{Duration, SystemTime, UNIX_EPOCH, Instant}, env};
+use std::{time::{ Instant}, env};
 use anyhow::{Context, Ok};
 
 use iota_client::{
@@ -11,21 +11,17 @@ use iota_client::{
         unlock_condition::{ 
             AddressUnlockCondition, 
             ExpirationUnlockCondition,
-            UnlockCondition,
-            TimelockUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition
+            UnlockCondition
         },
-        BasicOutputBuilder, Feature, OutputId, AliasOutput, RentStructure, AliasId, AliasOutputBuilder,
+        BasicOutputBuilder, Feature, OutputId,
        
     }, BlockId},
     utils::request_funds_from_faucet,
-    block::{address::{Address, self}},
+    block::{address::{Address}},
     secret::{mnemonic::MnemonicSecretManager,SecretManager},
     Client, 
-    node_api::indexer::query_parameters::QueryParameter, Error, Result, api_types::core::response::OutputWithMetadataResponse
+    node_api::indexer::query_parameters::QueryParameter, api_types::core::response::OutputWithMetadataResponse
 };
-
-use iota_wallet::account::AccountHandle;
-
 
 pub async fn setup_with_client() -> anyhow::Result<(SecretManager, Client, Address)> {
     let mut start;

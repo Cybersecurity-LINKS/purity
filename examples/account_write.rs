@@ -4,10 +4,8 @@
 
 //! cargo run --bin test
 
-use std::thread::sleep;
 use std::{env, path::PathBuf};
 use std::time::{Instant};
-use rand::prelude::*;
 use dotenv::dotenv;
 
 use iota_client::{
@@ -15,10 +13,7 @@ use iota_client::{
 };
 
 use iota_wallet::{
-    account_manager::AccountManager,
-    iota_client::constants::SHIMMER_COIN_TYPE,
-    secret::{stronghold::StrongholdSecretManager, SecretManager},
-    ClientOptions, Result, account::{AccountHandle, TransactionOptions},
+    account_manager::AccountManager, Result,
 };
 
 use purity::account::PurityAccountExt;
@@ -41,7 +36,11 @@ async fn main() -> Result<()> {
         println!("Stronghold already exists!");
     } else {
         println!("Setup stronghold");
-        setup_wallet().await?;
+        setup_wallet(
+            &env::var("STRONGHOLD_PASSWORD").unwrap(),
+            "wallet.stronghold",
+            &env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC").unwrap()
+        ).await?;
     }
 
     // Create the account manager

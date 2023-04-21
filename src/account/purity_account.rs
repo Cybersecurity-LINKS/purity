@@ -5,27 +5,22 @@
 use iota_wallet::account::AccountHandle;
 // use iota_wallet::account::AliasOutputOptions;
 
-use std::{time::{Duration, SystemTime, UNIX_EPOCH, Instant}, io::SeekFrom};
-use anyhow::{Context, Ok};
+use std::{time::{Duration, SystemTime, UNIX_EPOCH, Instant}};
+use anyhow::Ok;
 use async_trait::async_trait;
 
 use iota_client::{
     block::{output::{
-        feature::{TagFeature, MetadataFeature, SenderFeature},
+        feature::{TagFeature, MetadataFeature},
         unlock_condition::{ 
-            AddressUnlockCondition, 
-            ExpirationUnlockCondition,
+            AddressUnlockCondition,
             UnlockCondition,
-            TimelockUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition
+            TimelockUnlockCondition
         },
-        BasicOutputBuilder, Feature, OutputId, AliasOutput, RentStructure, AliasId, AliasOutputBuilder,
+        BasicOutputBuilder, Feature, OutputId, AliasId,
        
-    }, BlockId},
-    utils::request_funds_from_faucet,
-    block::{address::{Address, self}},
-    secret::{mnemonic::MnemonicSecretManager,SecretManager},
-    Client, 
-    node_api::indexer::query_parameters::QueryParameter, Error, Result
+    }},
+    block::{address::{Address}}
 };
 
 // use iota_wallet::account::operations::transaction::high_level::create_alias::AliasOutputOptionsDto;
@@ -61,7 +56,7 @@ impl PurityAccountExt for AccountHandle {
         address: String,
         tag: &str, 
         metadata: Vec<u8>,
-        expiration: Option<u32>
+        _expiration: Option<u32>
     ) -> anyhow::Result<OutputId> {
         log::info!("Start write_data");
         let write_data_start_time = Instant::now();
@@ -106,7 +101,7 @@ impl PurityAccountExt for AccountHandle {
         // println!("]");
     
     
-        let mut options = None; 
+        let options = None; 
         // if custom_input.len() != 0 {
         //     options = Some(TransactionOptions {
         //         custom_inputs: Some(vec![custom_input[0].output_id]),
