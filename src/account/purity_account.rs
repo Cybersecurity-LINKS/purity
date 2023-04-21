@@ -60,7 +60,7 @@ impl PurityAccountExt for AccountHandle {
     ) -> anyhow::Result<OutputId> {
         log::info!("Start write_data");
         let write_data_start_time = Instant::now();
-        
+        let len_metadata = metadata.len();
         let timelock = (SystemTime::now() + Duration::from_secs(60*60))
             .duration_since(UNIX_EPOCH)
             .expect("clock went backwards")
@@ -131,7 +131,7 @@ impl PurityAccountExt for AccountHandle {
         };
            
         log::info!("Finished write_data in {:.2?}", write_data_start_time.elapsed());
-        println!("Finished write_data in {:.2?}", write_data_start_time.elapsed());
+        println!("Finished write_data in {:.2?} - metadata len: {} B", write_data_start_time.elapsed(), len_metadata);
         let _ = self.sync(None).await?;
         return_value
     }
