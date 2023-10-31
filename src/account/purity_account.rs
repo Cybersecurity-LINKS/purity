@@ -15,12 +15,12 @@
 use iota_wallet::account::AccountHandle;
 // use iota_wallet::account::AliasOutputOptions;
 
-use std::{time::{Duration, SystemTime, UNIX_EPOCH, Instant}};
+use std::time::{Duration, SystemTime, UNIX_EPOCH, Instant};
 use anyhow::Ok;
 use async_trait::async_trait;
 
 use iota_client::{
-    block::{output::{
+    block::output::{
         feature::{TagFeature, MetadataFeature},
         unlock_condition::{ 
             AddressUnlockCondition,
@@ -29,8 +29,8 @@ use iota_client::{
         },
         BasicOutputBuilder, Feature, OutputId, AliasId,
        
-    }},
-    block::{address::{Address}}
+    },
+    block::address::Address
 };
 
 // use iota_wallet::account::operations::transaction::high_level::create_alias::AliasOutputOptionsDto;
