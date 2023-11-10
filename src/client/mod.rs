@@ -12,41 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{time::{ Instant}, env};
+use std::{time::Instant, env};
 use anyhow::{Context, Ok};
 
-use iota_client::{
-    block::{output::{
-        feature::{TagFeature, MetadataFeature, SenderFeature},
-        unlock_condition::{ 
-            AddressUnlockCondition, 
-            ExpirationUnlockCondition,
-            UnlockCondition
-        },
-        BasicOutputBuilder, Feature, OutputId,
-       
-    }, BlockId},
-    utils::request_funds_from_faucet,
-    block::{address::{Address}},
-    secret::{mnemonic::MnemonicSecretManager,SecretManager},
-    Client, 
-    node_api::indexer::query_parameters::QueryParameter, api_types::core::response::OutputWithMetadataResponse
+use iota_sdk::{
+    types::block::{
+        address::Bech32Address,
+        output::{
+            feature::{TagFeature, MetadataFeature, SenderFeature},
+            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, UnlockCondition},
+            BasicOutputBuilder, Feature, OutputId, OutputWithMetadata, 
+        }, 
+        BlockId
+    },
+    client::{ 
+        Client, 
+        utils::request_funds_from_faucet, 
+        secret::SecretManager,
+        node_api::indexer::query_parameters::QueryParameter, api::GetAddressesOptions
+    }
 };
 
-pub async fn setup_with_client() -> anyhow::Result<(SecretManager, Client, Address)> {
+use crate::utils::request_faucet_funds;
+
+pub async fn setup_with_client() -> anyhow::Result<(SecretManager, Client, Bech32Address)> {
     let mut start;
     let mut duration;
     
     println!("IOTA channel tests\n\n");
 
     start = Instant::now();
-    let client = Client::builder().with_node(&env::var("NODE_URL").unwrap())?.finish()?;
+    let client = Client::builder().with_node(&env::var("NODE_URL").unwrap())?.finish().await?;
     duration = start.elapsed().as_millis();
     println!("Time elapsed in Client::builder() is: {:?}", duration );
 
-    let secret_manager = SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
-        &std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC").unwrap(),
-    )?);
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC").unwrap())?;
 
     start = Instant::now();
     let token_supply = client.get_token_supply().await?;
@@ -55,15 +55,17 @@ pub async fn setup_with_client() -> anyhow::Result<(SecretManager, Client, Addre
     println!("Token supply: {token_supply}\n\n");
 
     start = Instant::now();
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
+    let addresses = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?)
+        .await?;
+    let address = addresses[0];
     duration = start.elapsed().as_millis();
     println!("Time elapsed in client.get_addresses() is: {:?}", duration );
-    let printable_address = address.to_bech32(client.get_bech32_hrp().await?);
 
-    println!("Address: {printable_address}");
+    println!("Address: {address}");
     if token_supply < 1000 {
         start = Instant::now();
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &printable_address).await?;
+        request_faucet_funds(&client, &address, &env::var("FAUCET_URL").unwrap()).await?;
         duration = start.elapsed().as_millis();
         println!("Time elapsed in client.get_addresses() is: {:?}", duration );
     }
@@ -73,7 +75,7 @@ pub async fn setup_with_client() -> anyhow::Result<(SecretManager, Client, Addre
 pub async fn write_with_client(
     secret_manager: &mut SecretManager,
     client: &Client, 
-    address: Address,
+    address: Bech32Address,
     tag: &str, 
     metadata: &str,
     expiration: Option<u32>
@@ -92,7 +94,7 @@ pub async fn write_with_client(
     let output;
     match expiration {
         Some(e) => { 
-            output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+            output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 .add_feature(Feature::Tag(TagFeature::new(tag.as_bytes().to_vec())?))
                 .add_feature(Feature::Metadata(MetadataFeature::new(metadata.as_bytes().to_vec())?))
                 .add_feature(Feature::Sender(SenderFeature::new(address)))
@@ -100,7 +102,7 @@ pub async fn write_with_client(
                 .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
                 .finish_output(token_supply)?;}, 
         None => { 
-            output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+            output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 .add_feature(Feature::Tag(TagFeature::new(tag.as_bytes().to_vec())?))
                 .add_feature(Feature::Metadata(MetadataFeature::new(metadata.as_bytes().to_vec())?))
                 .add_feature(Feature::Sender(SenderFeature::new(address)))
@@ -118,7 +120,7 @@ pub async fn write_with_client(
 
     start = Instant::now();
     let block = client
-        .block()
+        .build_block()
         .with_secret_manager(&secret_manager)
         .with_outputs(outputs)?
         .finish()
@@ -148,12 +150,13 @@ pub async fn read_by_tag(
 ) -> anyhow::Result<Vec<OutputId>> {
 
     let output_ids = client
-        .basic_output_ids(vec![
-            QueryParameter::Tag(format!("0x{}",hex::encode(tag))),
+    .basic_output_ids(vec![
+        QueryParameter::Tag(format!("0x{}",hex::encode(tag))),
 
-        ])
-        .await
-        .context("failed to retrieve output ids")?;
+    ])
+    .await
+    .context("failed to retrieve output ids")?
+    .items;
     
     Ok(output_ids)
 }
@@ -162,11 +165,11 @@ pub async fn read_by_tag(
 pub async fn read_outputs(
     client: &Client, 
     output_ids: Vec<OutputId>,
-) -> anyhow::Result<Vec<OutputWithMetadataResponse>> {
+) -> anyhow::Result<Vec<OutputWithMetadata>> {
 
     // Get the outputs by their IDs.
     let outputs_responses = client
-        .get_outputs(output_ids)
+        .get_outputs(&output_ids)
         .await
         .context("failed to get outputs")?;
     // println!("Basic outputs: {outputs_responses:#?}");
@@ -177,20 +180,21 @@ pub async fn read_outputs(
 pub async fn read(
     client: &Client, 
     tag: &str,
-    address: Address,
+    address: Bech32Address,
 ) -> anyhow::Result<Vec<OutputId>> {
 
     // start = Instant::now();
     let output_ids = client
         .basic_output_ids(vec![
-            QueryParameter::Address(address.to_bech32(client.get_bech32_hrp().await?)),
+            QueryParameter::Address(address),
             QueryParameter::Tag(format!("0x{}",hex::encode(tag))),
             // QueryParameter::HasExpiration(false),git sta
             // QueryParameter::HasTimelock(false),
             // QueryParameter::HasStorageDepositReturn(false),
         ])
         .await
-        .context("failed to retrieve output ids")?;
+        .context("failed to retrieve output ids")?
+        .items;
     // println!("Address output IDs {output_ids:#?}");
     
     // Get the outputs by their IDs.

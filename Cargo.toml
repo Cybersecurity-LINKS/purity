@@ -14,17 +14,15 @@ categories = [ "cryptography::cryptocurrencies" ]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# iota-client = {"2.0.1-rc.4", default-features = false, features = [ "message_interface", "tls" ]}
-iota-client = "2.0.1-rc.4" # Apache-2.0 license
-iota-wallet = "1.0.0-rc.5" # Apache-2.0 license
-tokio = { version = "1.22.0", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ] } # MIT license
-dotenv = "0.15.0" # MIT license
-hex = "0.4.3" # MIT OR Apache-2.0 license
-anyhow = "1.0.62" # MIT OR Apache-2.0 license
-rand = "0.8.5" # MIT OR Apache-2.0 license
-async-trait = "0.1.68" # MIT OR Apache-2.0 license
-log = "0.4" # MIT OR Apache-2.0 license
-pretty_env_logger = "0.4" # MIT OR Apache-2.0 license
+iota-sdk = { version = "1.1.2", features = ["stronghold", "rocksdb"]}
+tokio = { version = "1.22.0", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ] }
+dotenv = "0.15.0"
+hex = "0.4.3"
+anyhow = "1.0.62"
+rand = "0.8.5"
+async-trait = "0.1.68"
+log = "0.4"
+pretty_env_logger = "0.4"
 
 [lib]
 name = "purity"

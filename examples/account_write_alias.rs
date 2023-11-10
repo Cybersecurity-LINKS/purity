@@ -17,94 +17,51 @@
 use std::{env, path::PathBuf};
 use dotenv::dotenv;
 
-use iota_client::{
-    utils::request_funds_from_faucet
-};
-
-use iota_wallet::{
-    account_manager::AccountManager, Result,
-};
-
+use iota_sdk::Wallet;
+use iota_sdk::client::{request_funds_from_faucet, Client};
 use purity::account::PurityAccountExt;
-use purity::utils::setup_wallet;
+use purity::utils::{create_or_recover_wallet, print_accounts, print_addresses, sync_print_balance, print_addresses_with_funds, request_faucet_funds};
 
 extern crate pretty_env_logger;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> anyhow::Result<()> {
 
     pretty_env_logger::init();
 
     // This example uses dotenv, which is not safe for use in production
     dotenv().ok();
 
-    if PathBuf::from("wallet.stronghold").exists() {
-        println!("Stronghold already exists!");
-    } else {
-        println!("Setup stronghold");
-        setup_wallet(
-            &env::var("STRONGHOLD_PASSWORD").unwrap(),
-            "wallet.stronghold",
-            &env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC").unwrap()
-        ).await?;
-    }
+    // Create a client
+    let client = Client::builder().with_node(&env::var("NODE_URL").unwrap())?.finish().await?;
+    // Create the wallet
+    let wallet = create_or_recover_wallet().await?;
+    // wallet.start_background_syncing(None, None).await?;
+    
+    // Create a new account
+    let account = wallet.get_or_create_account("Alice").await?;
+    account.hello();
 
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
-    // manager.start_background_syncing(None, None).await?;
-    // Set the stronghold password
-    manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
-        .await?;
-    let accounts = manager.get_accounts().await?;
-    let account = manager.get_account("Alice").await?;
+    print_accounts(&wallet).await?;
+    print_addresses(&account).await?;
 
     // Sync account to make sure account is updated with outputs from previous examples
     // Sync the account to get the outputs for the addresses
-    let _ = account.sync(None).await?;
+    // Change to `true` to print the full balance report
+    sync_print_balance(&account, false).await?;
+    print_addresses_with_funds(&account).await?;
 
-    println!("Accounts: [");
-    for a in &accounts  {
-        println!("  {}", a.alias().await );
-        let addrs = a.addresses().await?;
-        println!("  Addresses: [");
-        for addr in addrs {
-            println!("      {}", addr.address().to_bech32() );
-        }
-    }   
-    println!("]");
+    let addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?;
+    println!("Addresses with unspend outputs: \n{:?}", addresses_with_unspent_outputs);
+
+    let address = &account.generate_ed25519_addresses(1, None).await?[0];
+    println!("Generated address: {}", address.address());
+
+    request_faucet_funds(&client, address.address(), &env::var("FAUCET_URL").unwrap()).await?;
     
-    let unspent_outputs = account.unspent_outputs(None).await?;
-    // println!("Unspent outputs: {unspent_outputs:#?}");
-    println!("Output Ids: [");
-    for o in unspent_outputs  {
-        println!("{}", o.output_id)
-    }   
-    println!("]");
-   
-    println!("Total balance: {}", account.balance().await?.base_coin.total);
-
-    let _addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?;
-    let addresses;
-    let address;
-
-    // if addresses_with_unspent_outputs.len() > 0 {
-    //     address = addresses_with_unspent_outputs[1].address();
-    // } else {
-        addresses = account.generate_addresses(1, None).await?;
-        address =  addresses[0].address();
-    
-        let faucet_response =
-            request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address.to_bech32()).await?;
-        println!("{faucet_response}");
-    // }
-
-    let printable_address = address.to_bech32(); // String::from("tst1qqe0lsnt2fk0zhvdcst9txwxm7x8dpt9vsku609gkavlvq3wutkz2jtt27n");
-    println!("Generated address: {}", printable_address);
-    
-    // new_alias_output(&account, address.as_ref().clone(),(0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>()).await;
-
-    let _ = account.write_alias_data(printable_address, (0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>(), (0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>(), None).await;
+    let random_tag = (0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>();
+    let random_metadata = (0..10).map(|_| rand::random::<u8>()).collect::<Vec<u8>>();
+    let _ = account.write_alias_data(address.address(), random_tag, random_metadata, None).await;
     println!("end");
 
     Ok(())

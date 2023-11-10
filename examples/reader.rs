@@ -13,13 +13,11 @@
 // limitations under the License.
 
 use std::collections::HashSet;
-
 use purity::client::read;
 
-use iota_client::{
-    block::address::Address,
-    block::output::OutputId,
-    Client
+use iota_sdk::{
+    types::block::{output::OutputId, address::Bech32Address}, 
+    client::Client
 };
 
 #[tokio::main]
@@ -28,12 +26,12 @@ async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
 
     let tag = "wallet-lib";
-    let client = Client::builder().with_node(&std::env::var("NODE_URL").unwrap())?.finish()?;
-    let addr = "rms1qzr4f5uy29mc2f92xulgez9ja0jcj349yggwze9y4mm9te6yd9np5ewahuu";
+    let client = Client::builder().with_node(&std::env::var("NODE_URL").unwrap())?.finish().await?;
+    let addr = "rms1qplyhddljvsu7sx68d4gsk3sxq9zj797mvzalq09q2r9tx6yknne6gxqw26";
     let mut id_set: HashSet<OutputId> = HashSet::new();
     loop {
         
-        let outputs =  read(&client, tag, Address::try_from_bech32(addr)?.1).await?;
+        let outputs =  read(&client, tag, Bech32Address::try_from_str(addr)?).await?;
         outputs.iter().for_each(|output| {
             if !id_set.contains(&output) {
                 id_set.insert(output.clone());
@@ -42,8 +40,5 @@ async fn main() -> anyhow::Result<()> {
         });
 
     }
-
-
-
     Ok(())
 }

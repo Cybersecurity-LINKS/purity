@@ -12,35 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use iota_wallet::account::AccountHandle;
-// use iota_wallet::account::AliasOutputOptions;
-
 use std::time::{Duration, SystemTime, UNIX_EPOCH, Instant};
 use anyhow::Ok;
 use async_trait::async_trait;
 
-use iota_client::{
-    block::output::{
-        feature::{TagFeature, MetadataFeature},
-        unlock_condition::{ 
-            AddressUnlockCondition,
-            UnlockCondition,
-            TimelockUnlockCondition
-        },
-        BasicOutputBuilder, Feature, OutputId, AliasId,
-       
+use iota_sdk::{wallet::account::Account, types::block::{address::Bech32Address, output::feature::SenderFeature}};
+use iota_sdk::types::block::output::{
+    feature::{TagFeature, MetadataFeature},
+    unlock_condition::{ 
+        AddressUnlockCondition,
+        UnlockCondition,
+        TimelockUnlockCondition
     },
-    block::address::Address
+    BasicOutputBuilder, Feature, OutputId, AliasId,
 };
-
-// use iota_wallet::account::operations::transaction::high_level::create_alias::AliasOutputOptionsDto;
 
 #[async_trait]
 pub trait PurityAccountExt {
     fn hello(&self);
     async fn write_data(
         &self,
-        address: String,
+        address: &Bech32Address,
         tag: &str, 
         metadata: Vec<u8>,
         expiration: Option<u32>
@@ -48,7 +40,7 @@ pub trait PurityAccountExt {
 
     async fn write_alias_data(
         &self,
-        address: String,
+        address: &Bech32Address,
         tag: Vec<u8>, 
         metadata: Vec<u8>,
         alias_id: Option<AliasId>,
@@ -56,14 +48,14 @@ pub trait PurityAccountExt {
 }
 
 #[async_trait]
-impl PurityAccountExt for AccountHandle {
+impl PurityAccountExt for Account {
     fn hello(&self) {
         println!("Hello Extension!");
     }
 
     async fn write_data(
         &self,
-        address: String,
+        address: &Bech32Address,
         tag: &str, 
         metadata: Vec<u8>,
         _expiration: Option<u32>
@@ -80,15 +72,11 @@ impl PurityAccountExt for AccountHandle {
         // Send native tokens together with the required storage deposit
         let rent_structure = self.client().get_rent_structure().await?;
     
-        let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+        let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
             .add_feature(Feature::Tag(TagFeature::new(tag.as_bytes().to_vec())?))
             .add_feature(Feature::Metadata(MetadataFeature::new(metadata)?))
-            // .add_feature(Feature::Sender(SenderFeature::new(
-            //     Address::try_from_bech32(&address)?.1,
-            // )))
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                Address::try_from_bech32(&address)?.1,
-            )))
+            .add_feature(Feature::Sender(SenderFeature::new(address)))
+            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
             .add_unlock_condition(UnlockCondition::Timelock(TimelockUnlockCondition::new(timelock)?))
             .finish_output(self.client().get_token_supply().await?)?;
 
@@ -122,7 +110,7 @@ impl PurityAccountExt for AccountHandle {
     
     
         //let transaction = account.send(outputs, options).await?;
-        let return_value = match self.send(outputs, options).await {
+        let return_value = match self.send_outputs(outputs, options).await {
             anyhow::Result::Ok(t) => {
                 // Save the transaction in a variable
                            
@@ -148,7 +136,7 @@ impl PurityAccountExt for AccountHandle {
 
     async fn write_alias_data(
         &self,
-        _address: String,
+        _address:  &Bech32Address,
         _tag: Vec<u8>, 
         _metadata: Vec<u8>,
         alias_id: Option<AliasId>,
