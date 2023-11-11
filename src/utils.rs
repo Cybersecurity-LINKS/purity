@@ -32,16 +32,21 @@ use iota_sdk::wallet::{ClientOptions, Result, Account};
 
 pub async fn setup_secret_manager() -> Result<StrongholdAdapter> {
 
+    let exists = PathBuf::from(&std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap()).exists();
+
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
         .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
-    // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
-    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
+    if !exists {
+        log::info!("Storing mnemonic...");
+        // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
+        let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
 
-    // The mnemonic only needs to be stored the first time
-    secret_manager.store_mnemonic(mnemonic).await?;
+        // The mnemonic only needs to be stored the first time
+        secret_manager.store_mnemonic(mnemonic).await?;
+    }
 
     Ok(secret_manager)
 }
