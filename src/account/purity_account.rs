@@ -75,7 +75,7 @@ impl PurityAccountExt for Account {
         let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
             .add_feature(Feature::Tag(TagFeature::new(tag.as_bytes().to_vec())?))
             .add_feature(Feature::Metadata(MetadataFeature::new(metadata)?))
-            .add_feature(Feature::Sender(SenderFeature::new(address)))
+            // .add_feature(Feature::Sender(SenderFeature::new(address)))
             .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
             .add_unlock_condition(UnlockCondition::Timelock(TimelockUnlockCondition::new(timelock)?))
             .finish_output(self.client().get_token_supply().await?)?;

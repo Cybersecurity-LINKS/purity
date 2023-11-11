@@ -19,6 +19,7 @@ use iota_sdk::client::node_api::indexer::query_parameters::QueryParameter;
 use iota_sdk::crypto::keys::bip39::Mnemonic;
 use iota_sdk::types::api::core::response::OutputWithMetadataResponse;
 use iota_sdk::types::block::address::Bech32Address;
+use iota_sdk::types::block::output::{OutputWithMetadata, Output};
 use iota_sdk::types::block::output::dto::OutputDto;
 use iota_sdk::types::block::output::feature::dto::FeatureDto;
 
@@ -85,22 +86,22 @@ pub async fn create_or_recover_wallet() -> Result<Wallet> {
     wallet
 }
 
-pub fn get_metadata(o: OutputWithMetadataResponse) -> anyhow::Result<Vec<u8>> {
-    match o.output {
-        OutputDto::Basic(b) => { 
+// pub fn get_metadata(o: OutputWithMetadata) -> anyhow::Result<Vec<u8>> {
+//     match o.into_output() {
+//         Output::Basic(b) => { 
 
-            for f in b.features {
-                if let FeatureDto::Metadata(m) = f {
-                    return Ok( hex::decode(&m.data[2..]).unwrap() );               
-                }
-            }
-            anyhow::bail!("No FeatureDto::Metadata") 
-        }
-        _ => { 
-            anyhow::bail!("No OutputDto of type Basic")
-        }
-    }
-}
+//             for f in b.features().metadata().into_iter() {
+//                 if let FeatureDto::Metadata(m) = f {
+//                     return Ok( hex::decode(&m.data[2..]).unwrap() );               
+//                 }
+//             }
+//             anyhow::bail!("No FeatureDto::Metadata") 
+//         }
+//         _ => { 
+//             anyhow::bail!("No OutputDto of type Basic")
+//         }
+//     }
+// }
 
 // Copyright 2020-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
